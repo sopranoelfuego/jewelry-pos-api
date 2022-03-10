@@ -1,6 +1,6 @@
 // import { query } from 'express'
 import Connection from '../utils/dbConnect'
-import { User } from '../utils/types'
+import { CreateProduct, User, CreateUser } from '../utils/types'
 
 export default class userModel {
  getAll(cb: Function): any {
@@ -9,10 +9,16 @@ export default class userModel {
    cb(err, { success: true, data })
   })
  }
- create(newUser: User, cb: Function) {
+ create(newData: CreateUser, cb: Function) {
   const qry = 'insert into user set ?'
-  console.log('newUser here', newUser)
-  Connection.query(qry, [newUser], (err: Error | null, data: [User]) => {
+
+  Connection.query(qry, [newData], (err: Error | null, data: [User]) => {
+   cb(err, { success: true, data })
+  })
+ }
+ getById(id: User['id'], cb: Function) {
+  const qry = 'select * from user where id=?'
+  Connection.query(qry, [id], (err: Error | null, data: [User]) => {
    cb(err, { success: true, data })
   })
  }

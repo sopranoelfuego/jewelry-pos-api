@@ -29,13 +29,23 @@ export interface CreateUser {
  profileId: number
 }
 export interface Product {
- id: string
+ id: number
  name: string
  description: string
- category: Category
- supplier: Supplier
+ categoryId: number
+ category?: Category
+ supplierId: number
+ supplier?: Supplier
  price: number
  barCode?: number
+}
+export interface CreateProduct {
+ name: string
+ description: string
+ categoryId: number
+ supplierId: number
+ price: number
+ barCode?: string
 }
 export interface Order {
  id: string
