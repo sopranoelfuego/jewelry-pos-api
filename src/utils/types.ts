@@ -32,6 +32,7 @@ export interface Product {
  id: number
  name: string
  description: string
+ qty: number
  categoryId: number
  category?: Category
  supplierId: number
@@ -45,13 +46,15 @@ export interface CreateProduct {
  categoryId: number
  supplierId: number
  price: number
+ qty: number
  barCode?: string
 }
 export interface Order {
- id: string
+ id: number
  orderNumber: string
  costumer: string
- employe: User
+ employeId: number
+ employe?: User
  status: number
  subtotal: number
  payment: string
@@ -59,9 +62,15 @@ export interface Order {
  orderMonth: number
  orderYear: number
  orderDay: number
-
  createdAt: Date
  updatedAt: Date
+}
+export interface CreateOrder {
+ costumer: string
+ employeId: number
+ status: number
+ subtotal: number
+ payment: string
 }
 export interface OrderDetail {
  id: string
