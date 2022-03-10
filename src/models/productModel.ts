@@ -11,7 +11,7 @@ export default class userModel {
  create(newRecord: CreateProduct, cb: Function) {
   const qry = 'insert into product set ?'
 
-  Connection.query(qry, [newRecord], (err: Error | null, data: [Product]) => {
+  Connection.query(qry, [newRecord], (err: Error | null, data: Object) => {
    cb(err, { success: true, data })
   })
  }

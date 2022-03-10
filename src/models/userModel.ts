@@ -12,7 +12,7 @@ export default class userModel {
  create(newData: CreateUser, cb: Function) {
   const qry = 'insert into user set ?'
 
-  Connection.query(qry, [newData], (err: Error | null, data: [User]) => {
+  Connection.query(qry, [newData], (err: Error | null, data: Object) => {
    cb(err, { success: true, data })
   })
  }

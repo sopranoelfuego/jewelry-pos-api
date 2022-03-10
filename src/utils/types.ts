@@ -73,9 +73,18 @@ export interface CreateOrder {
  payment: string
 }
 export interface OrderDetail {
- id: string
- order: Order
- product: Product
+ id: number
+ orderId: number
+ order?: Order
+ productId: number
+ product?: Product
+ price: number
+ qty: number
+ total: number
+}
+export interface CreateOrderDetail {
+ orderId: number
+ productId: number
  price: number
  qty: number
  total: number

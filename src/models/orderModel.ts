@@ -13,7 +13,7 @@ export default class userModel {
   const qry = 'insert into orders set ?'
   const newData = { ...newRecord, orderNumber: nanoid() }
 
-  Connection.query(qry, [newData], (err: Error | null, data: [Order]) => {
+  Connection.query(qry, [newData], (err: Error | null, data: Object) => {
    cb(err, { success: true, data })
   })
  }
