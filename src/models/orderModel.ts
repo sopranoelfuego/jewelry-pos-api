@@ -11,10 +11,34 @@ export default class userModel {
  }
  create(newRecord: CreateOrder, cb: Function) {
   const qry = 'insert into orders set ?'
-  const newData = { ...newRecord, orderNumber: nanoid() }
+  let orderNumber = nanoid()
+  const newData = { ...newRecord.order, orderNumber }
 
-  Connection.query(qry, [newData], (err: Error | null, data: Object) => {
-   cb(err, { success: true, data })
+  //   console.log('detailsArray', detailsArray)
+  let trans = `start transaction;
+     insert into orderDetails set ?
+     select @totalSum:=sum(orDetai.total) from product prod,orderDetails orDetai where orDetai.productId=prod.id and orDetai.orderId=?
+     update order set subtotal=@totalSum where id=?
+     COMMIT;
+    `
+
+  Connection.query(qry, [newData], (err: Error | null, data) => {
+   if (!data.insertId) {
+    cb(err, { success: false, message: 'sorry order not executed..' })
+   }
+   let detailsArray = []
+
+   for (var i = 0; i < newRecord.details.length; i++) {
+    let { productId, qty, total } = newRecord.details[i]
+    detailsArray.push([data.insertId, productId, qty, total])
+   }
+   Connection.query(
+    trans,
+    [detailsArray, data.insertId, data.insertId],
+    (err: Error | null, data) => {
+     cb(err, { success: true, data })
+    }
+   )
   })
  }
  getById(id: Order['id'], cb: Function) {

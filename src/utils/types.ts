@@ -66,11 +66,19 @@ export interface Order {
  updatedAt: Date
 }
 export interface CreateOrder {
- costumer: string
- employeId: number
- status: number
- subtotal: number
- payment: string
+ //  costumer: string
+ //  employeId: number
+ //  status: number
+ //  subtotal: number
+ //  payment: string
+ order: {
+  costumer: string
+  employeId: number
+  status: number
+  subtotal: number
+  payment: string
+ }
+ details: [CreateOrderDetail]
 }
 export interface OrderDetail {
  id: number
@@ -87,7 +95,7 @@ export interface CreateOrderDetail {
  productId: number
  price: number
  qty: number
- total: number
+ total?: number
 }
 export interface Location {
  id?: number

@@ -10,10 +10,21 @@ export default class OrderDetailModel {
  }
  create(newRecord: CreateOrderDetail, cb: Function) {
   const qry = 'insert into orderDetails set ?'
-  const verifRequest = `select * from product where id=${newRecord.productId} and qty>=${newRecord.qty} and qty<>0 `
-  Connection.query(verifRequest, (err: Error | null, data: Object) => {
-   cb(err, { success: true, data })
-  })
+  const verifRequest = `select * from product where id=? and qty>=? and qty>0 `
+  Connection.query(
+   verifRequest,
+   [newRecord.productId, newRecord.qty],
+   (err: Error | null, data: [Object]) => {
+    if (!data[0])
+     cb(err, {
+      success: false,
+      message: 'such quantity of products is available',
+     })
+    Connection.query(qry, [newRecord], (err: Error | null, data: [Object]) => {
+     cb(err, { success: true, data })
+    })
+   }
+  )
  }
  getById(id: OrderDetail['id'], cb: Function) {
   const qry = 'select * from orderDetails where id=? '
