@@ -75,7 +75,7 @@ export interface CreateOrder {
   costumer: string
   employeId: number
   status: number
-  subtotal: number
+  subtotal?: number
   payment: string
  }
  details: [CreateOrderDetail]
