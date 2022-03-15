@@ -89,28 +89,16 @@ export default class orderModel {
     console.log('Transaction Complete.')
    })
   })
-
-  // Connection.query(qry, [newData], (err: Error | null, data) => {
-  //  if (!data.insertId) {
-  //   cb(err, { success: false, message: 'sorry order not executed..' })
-  //  }
-  //  let detailsArray = []
-
-  //  for (var i = 0; i < newRecord.details.length; i++) {
-  //   let { productId, qty, total } = newRecord.details[i]
-  //   detailsArray.push([data.insertId, productId, qty, total])
-  //  }
-  //  Connection.query(
-  //   trans,
-  //   [detailsArray, data.insertId, data.insertId],
-  //   (err: Error | null, data) => {
-  //    cb(err, { success: true, data })
-  //   }
-  //  )
-  // })
  }
  getById(id: Order['id'], cb: Function) {
   const qry = 'select * from orders where id=?'
+  Connection.query(qry, [id], (err: Error | null, data: [User]) => {
+   cb(err, { success: true, data })
+  })
+ }
+ getDetailedOrder(id: Order['id'], cb: Function) {
+  const qry =
+   'SELECT ord.orderNumber,ord.orderTime,ord.subtotal total,prod.name product,prod.price unityPrice,ordDetail.qty quantity,ordDetail.total subtotal  from orders ord,orderDetails ordDetail ,product prod where ord.id=ordDetail.orderId and ordDetail.productId=prod.id and ord.id=? '
   Connection.query(qry, [id], (err: Error | null, data: [User]) => {
    cb(err, { success: true, data })
   })
