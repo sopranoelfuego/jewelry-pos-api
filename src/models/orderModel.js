@@ -1,15 +1,14 @@
 import { nanoid } from 'nanoid'
-import Connection from '../utils/dbConnect'
-import { CreateOrder, Order, User } from '../utils/types'
+import Connection from '../utils/dbConnect.js'
 
 export default class orderModel {
- getAll(cb: Function): any {
+ getAll(cb) {
   const qry = 'select * from orders order by id desc'
-  Connection.query(qry, (err: Error | null, data: [Order]) => {
+  Connection.query(qry, (err, data) => {
    cb(err, { success: true, data })
   })
  }
- create(newRecord: CreateOrder, cb: Function) {
+ create(newRecord, cb) {
   const qry = 'insert into orders set ?'
 
   const detailsTrans =
@@ -27,9 +26,9 @@ export default class orderModel {
      update order set subtotal=@totalSum where id=?
      COMMIT
     `
-  Connection.beginTransaction((err: Error) => {
+  Connection.beginTransaction(err => {
    if (err) throw err
-   Connection.query(qry, [newData], (err: Error | null, data) => {
+   Connection.query(qry, [newData], (err, data) => {
     if (err) {
      Connection.rollback(function () {
       throw err
@@ -44,40 +43,32 @@ export default class orderModel {
      detailsArray.push([data.insertId, productId, qty, total])
     }
     console.log('detailsArray', detailsArray)
-    Connection.query(
-     detailsTrans,
-     [detailsArray],
-     (err: Error | null, data1) => {
-      if (err) {
-       Connection.rollback(function () {
-        throw err
-       })
-      }
-      // data[0].total
+    Connection.query(detailsTrans, [detailsArray], (err, data1) => {
+     if (err) {
+      Connection.rollback(function () {
+       throw err
+      })
      }
-    )
-    Connection.query(
-     getSumForOrder,
-     [data.insertId],
-     (err: Error | null, data1) => {
-      if (err) {
-       Connection.rollback(function () {
-        throw err
-       })
-      }
-      Connection.query(
-       updateTotalOrder,
-       [data1[0].total, data.insertId],
-       (err: Error | null, data2) => {
-        if (err) {
-         Connection.rollback(function () {
-          throw err
-         })
-        }
+     // data[0].total
+    })
+    Connection.query(getSumForOrder, [data.insertId], (err, data1) => {
+     if (err) {
+      Connection.rollback(function () {
+       throw err
+      })
+     }
+     Connection.query(
+      updateTotalOrder,
+      [data1[0].total, data.insertId],
+      (err, data2) => {
+       if (err) {
+        Connection.rollback(function () {
+         throw err
+        })
        }
-      )
-     }
-    )
+      }
+     )
+    })
    })
    Connection.commit(function (err) {
     if (err) {
@@ -90,16 +81,17 @@ export default class orderModel {
    })
   })
  }
- getById(id: Order['id'], cb: Function) {
+ getById(id, cb) {
   const qry = 'select * from orders where id=?'
-  Connection.query(qry, [id], (err: Error | null, data: [User]) => {
+  Connection.query(qry, [id], (err, data) => {
    cb(err, { success: true, data })
   })
  }
- getDetailedOrder(id: Order['id'], cb: Function) {
+ getDetailedOrder(id, cb) {
   const qry =
-   'SELECT ord.orderNumber,ord.orderTime,ord.subtotal total,prod.name product,prod.price unityPrice,ordDetail.qty quantity,ordDetail.total subtotal  from orders ord,orderDetails ordDetail ,product prod where ord.id=ordDetail.orderId and ordDetail.productId=prod.id and ord.id=? '
-  Connection.query(qry, [id], (err: Error | null, data: [User]) => {
+   'SELECT ord.orderNumber,ord.orderTime,ord.subtotal total,prod.name product,prod.price unityPrice,ordDetail.qty quantity,ordDetail.total subtotal,prod.description description  from orders ord,orderDetails ordDetail ,product prod where ord.id=ordDetail.orderId and ordDetail.productId=prod.id and ord.id=? '
+  Connection.query(qry, [id], (err, data) => {
+   console.log('data')
    cb(err, { success: true, data })
   })
  }

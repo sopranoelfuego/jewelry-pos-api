@@ -10,7 +10,7 @@ const con = {
 }
 
 const dbConnect = mysql.createConnection(con)
-dbConnect.connect(function (err: string) {
+dbConnect.connect(function (err) {
  if (err) throw new Error(err)
  console.log('db connect successufull..')
 })
