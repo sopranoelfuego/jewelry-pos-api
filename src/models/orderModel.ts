@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid'
 import Connection from '../utils/dbConnect'
 import { CreateOrder, Order, User } from '../utils/types'
 
-export default class orderModel {
+export default class userModel {
  getAll(cb: Function): any {
   const qry = 'select * from orders order by id desc'
   Connection.query(qry, (err: Error | null, data: [Order]) => {
@@ -11,103 +11,90 @@ export default class orderModel {
  }
  create(newRecord: CreateOrder, cb: Function) {
   const qry = 'insert into orders set ?'
-
-  const detailsTrans =
-   'insert into orderDetails(orderId, productId, qty, total) values ?'
-  const getSumForOrder =
-   'select sum(orDetai.total) total from product prod,orderDetails orDetai where orDetai.productId=prod.id and orDetai.orderId=?'
-  const updateTotalOrder = 'update orders set subtotal=? where id=?'
-  let orderNumber = nanoid()
+  let orderNumber =
+   `${new Date().getFullYear()}` +
+   `${new Date().getMonth() + 1}` +
+   `${new Date().getDate()}` +
+   `${new Date().getSeconds()}` +
+   `${new Date().getMilliseconds()}`
   const newData = { ...newRecord.order, orderNumber }
 
   //   console.log('detailsArray', detailsArray)
-  let trans = `start transaction
-     insert into orderDetails(orderId,productId, qty,total) values ?
-     select @totalSum:=sum(orDetai.total) from product prod,orderDetails orDetai where orDetai.productId=prod.id and orDetai.orderId=?
-     update order set subtotal=@totalSum where id=?
-     COMMIT
+  let trans = `
+   set delimiter //;
+  start transaction;
+     insert into orders set ?
+     insert into orderDetails set ?
+     select @totalSum:=sum(total) from orderDetails  where orderNumber=?
+     update orders set subtotal=@totalSum where orderNumber=?
+     COMMIT;
+     set delimiter ;
     `
-  Connection.beginTransaction((err: Error) => {
-   if (err) throw err
-   Connection.query(qry, [newData], (err: Error | null, data) => {
+
+  // Connection.query(
+  //  trans,
+  //  [newData, detailsArray, orderNumber, orderNumber],
+  //  (err: Error | null, data) => {
+  //   if (!data) {
+  //    err && console.log('err.message', err.message)
+  //   }
+  //   cb(err, { success: false, data })
+  //  }
+  // )
+  const query1 = `insert into orders set ?`
+  const query2 = `insert into orderDetails set ?`
+  const query3 = `select @totalSum:=sum(total) from orderDetails  where orderNumber=?`
+  const query4 = `update orders set subtotal=@totalSum where orderNumber=?`
+
+  Connection.beginTransaction(function (err) {
+   if (err) {
+    throw err
+   }
+   Connection.query(query1, [newData], function (err: Error | null, data) {
     if (err) {
      Connection.rollback(function () {
       throw err
      })
     }
-
-    let detailsArray = []
-
-    for (var i = 0; i < newRecord?.details.length; i++) {
-     let { productId, qty, total } = newRecord.details[i]
-
-     detailsArray.push([data.insertId, productId, qty, total])
-    }
-    console.log('detailsArray', detailsArray)
-    Connection.query(
-     detailsTrans,
-     [detailsArray],
-     (err: Error | null, data1) => {
-      if (err) {
-       Connection.rollback(function () {
-        throw err
-       })
-      }
-      // data[0].total
-     }
-    )
-    Connection.query(
-     getSumForOrder,
-     [data.insertId],
-     (err: Error | null, data1) => {
-      if (err) {
-       Connection.rollback(function () {
-        throw err
-       })
-      }
-      Connection.query(
-       updateTotalOrder,
-       [data1[0].total, data.insertId],
-       (err: Error | null, data2) => {
-        if (err) {
-         Connection.rollback(function () {
-          throw err
-         })
-        }
-       }
-      )
-     }
-    )
    })
+   let detailsArray = []
+   for (var i = 0; i < newRecord.details.length; i++) {
+    let { productId, qty, unityPrice } = newRecord.details[i]
+    detailsArray.push([orderNumber, productId, qty, unityPrice, 0])
+   }
+   Connection.query(query2, [detailsArray], function (err, result) {
+    if (err) {
+     Connection.rollback(function () {
+      throw err
+     })
+    }
+   })
+   Connection.query(query3, [orderNumber], function (err, result) {
+    if (err) {
+     Connection.rollback(function () {
+      throw err
+     })
+    }
+   })
+
+   Connection.query(query4, [orderNumber], function (err, result) {
+    if (err) {
+     Connection.rollback(function () {
+      throw err
+     })
+    }
+   })
+
    Connection.commit(function (err) {
     if (err) {
      Connection.rollback(function () {
       throw err
      })
     }
-    cb(err, { success: true, data: 'successfull created...' })
-    console.log('Transaction Complete.')
+    console.log('success!')
+    cb(err, { success: true, data: 'created successfull..' })
    })
   })
-
-  // Connection.query(qry, [newData], (err: Error | null, data) => {
-  //  if (!data.insertId) {
-  //   cb(err, { success: false, message: 'sorry order not executed..' })
-  //  }
-  //  let detailsArray = []
-
-  //  for (var i = 0; i < newRecord.details.length; i++) {
-  //   let { productId, qty, total } = newRecord.details[i]
-  //   detailsArray.push([data.insertId, productId, qty, total])
-  //  }
-  //  Connection.query(
-  //   trans,
-  //   [detailsArray, data.insertId, data.insertId],
-  //   (err: Error | null, data) => {
-  //    cb(err, { success: true, data })
-  //   }
-  //  )
-  // })
  }
  getById(id: Order['id'], cb: Function) {
   const qry = 'select * from orders where id=?'

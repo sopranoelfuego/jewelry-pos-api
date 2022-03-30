@@ -91,10 +91,11 @@ export interface OrderDetail {
  total: number
 }
 export interface CreateOrderDetail {
- orderId: number
+ orderNumber: string
  productId: number
  price: number
  qty: number
+ unityPrice: number
  total?: number
 }
 export interface Location {
