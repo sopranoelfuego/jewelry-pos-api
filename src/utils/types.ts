@@ -126,3 +126,18 @@ export interface Supplier {
  phoneNumber: string
  addresse: string
 }
+
+export interface IOrderResponce {
+ success: boolean
+ data: IOrderDetailed[]
+}
+export interface IOrderDetailed {
+ orderNumber: string
+ orderTime: string
+ total: number
+ product: string
+ unityPrice: number
+ quantity: number
+ subtotal: number
+ description: string
+}

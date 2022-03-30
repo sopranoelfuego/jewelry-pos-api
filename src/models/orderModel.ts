@@ -108,7 +108,14 @@ export default class userModel {
  }
  getById(id: Order['id'], cb: Function) {
   const qry = 'select * from orders where id=?'
-  Connection.query(qry, [id], (err: Error | null, data: [User]) => {
+  Connection.query(qry, [id], (err: Error | null, data: [Order]) => {
+   cb(err, { success: true, data })
+  })
+ }
+ getByOrderNumber(orderNumber: Order['orderNumber'], cb: Function) {
+  const qry =
+   'SELECT ord.orderNumber,ord.orderTime,ord.subtotal total,prod.name product,ordDetail.unityPrice unityPrice,ordDetail.qty quantity,ordDetail.total subtotal,prod.description description  from orders ord,orderDetails ordDetail ,product prod where ordDetail.productId=prod.id and ordDetail.orderNumber=ord.orderNumber and ord.orderNumber=?'
+  Connection.query(qry, [orderNumber], (err: Error | null, data: Order[]) => {
    cb(err, { success: true, data })
   })
  }

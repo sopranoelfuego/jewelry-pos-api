@@ -1,11 +1,11 @@
 import express from 'express'
 import dotenv from 'dotenv'
-import dbConnect from './utils/dbConnect'
+import dbConnect from './src/utils/dbConnect'
 import cors from 'cors'
-import userRoutes from './routes/userRoutes'
-import productRoutes from './routes/productRoutes'
-import orderRoutes from './routes/orderRoutes'
-import orderDetails from './routes/orderDetailRoutes'
+import userRoutes from './src/routes/userRoutes'
+import productRoutes from './src/routes/productRoutes'
+import orderRoutes from './src/routes/orderRoutes'
+import orderDetails from './src/routes/orderDetailRoutes'
 
 dotenv.config()
 dbConnect
@@ -13,7 +13,7 @@ const app = express()
 // middlware
 app.use(express.json())
 app.use(cors())
-
+app.use(express.static('uploads'))
 // Routes
 app.use('/api/user', userRoutes)
 app.use('/api/product', productRoutes)
