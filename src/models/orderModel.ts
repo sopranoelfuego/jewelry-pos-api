@@ -20,11 +20,12 @@ export default class userModel {
   const newData = { ...newRecord.order, orderNumber }
 
   //   console.log('detailsArray', detailsArray)
+  // ;('insert into orderDetails(orderId, productId, qty, total) values ?')
   let trans = `
    set delimiter //;
   start transaction;
      insert into orders set ?
-     insert into orderDetails set ?
+     insert into orderDetails(orderNumber,productId,qty,unityPrice) values ?
      select @totalSum:=sum(total) from orderDetails  where orderNumber=?
      update orders set subtotal=@totalSum where orderNumber=?
      COMMIT;
@@ -42,7 +43,7 @@ export default class userModel {
   //  }
   // )
   const query1 = `insert into orders set ?`
-  const query2 = `insert into orderDetails set ?`
+  const query2 = `insert into orderDetails(orderNumber,productId,qty,unityPrice) values ?`
   const query3 = `select @totalSum:=sum(total) from orderDetails  where orderNumber=?`
   const query4 = `update orders set subtotal=@totalSum where orderNumber=?`
 
@@ -60,10 +61,17 @@ export default class userModel {
    let detailsArray = []
    for (var i = 0; i < newRecord.details.length; i++) {
     let { productId, qty, unityPrice } = newRecord.details[i]
-    detailsArray.push([orderNumber, productId, qty, unityPrice, 0])
+    detailsArray.push([orderNumber, productId, qty, unityPrice])
    }
    Connection.query(query2, [detailsArray], function (err, result) {
     if (err) {
+     //  Connection.query(
+     //   'delete from orders where orderNumber=?',
+     //   [orderNumber],
+     //   function (err, result) {
+     //    console.log('deleted')
+     //   }
+     //  )
      Connection.rollback(function () {
       throw err
      })
@@ -82,17 +90,19 @@ export default class userModel {
      Connection.rollback(function () {
       throw err
      })
+     return
     }
-   })
+    Connection.commit(function (err) {
+     if (err) {
+      Connection.rollback(function () {
+       throw err
+      })
 
-   Connection.commit(function (err) {
-    if (err) {
-     Connection.rollback(function () {
-      throw err
-     })
-    }
-    console.log('success!')
-    cb(err, { success: true, data: 'created successfull..' })
+      cb(err, { success: false, data: err.message })
+     }
+     console.log('success!')
+     cb(err, { success: true, data: 'created successfull..' })
+    })
    })
   })
  }
