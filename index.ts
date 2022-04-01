@@ -6,13 +6,14 @@ import userRoutes from './src/routes/userRoutes'
 import productRoutes from './src/routes/productRoutes'
 import orderRoutes from './src/routes/orderRoutes'
 import orderDetails from './src/routes/orderDetailRoutes'
-
+import cookieParser from 'cookie-parser'
 dotenv.config()
 dbConnect
 const app = express()
 // middlware
 app.use(express.json())
 app.use(cors())
+app.use(cookieParser())
 app.use(express.static('uploads'))
 // Routes
 app.use('/api/user', userRoutes)

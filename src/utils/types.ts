@@ -3,6 +3,7 @@ export interface User {
  userName: string
  firstName: string
  lastName: string
+ password: string
  email: string
  profilePicture?: string
  locationId: string
@@ -21,6 +22,7 @@ export interface CreateUser {
  firstName: string
  lastName: string
  email: string
+ password: string
  profilePicture?: string
  locationId: string
  addresse: string
@@ -131,6 +133,10 @@ export interface IOrderResponce {
  success: boolean
  data: IOrderDetailed[]
 }
+export interface IUserResponse {
+ success: boolean
+ data: User[]
+}
 export interface IOrderDetailed {
  orderNumber: string
  orderTime: string
@@ -140,4 +146,8 @@ export interface IOrderDetailed {
  quantity: number
  subtotal: number
  description: string
+}
+export interface IGeneralResponse {
+ success: boolean
+ data: Object
 }

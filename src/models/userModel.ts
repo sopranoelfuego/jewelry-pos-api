@@ -22,4 +22,11 @@ export default class userModel {
    cb(err, { success: true, data })
   })
  }
+ //  CUSTOM FUNCTION
+ findByEmail(email: User['email'], cb: Function) {
+  const qry = 'select * from user where email=?'
+  Connection.query(qry, [email.trim()], (err: Error | null, data: [User]) => {
+   cb(err, { success: true, data })
+  })
+ }
 }
