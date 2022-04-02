@@ -26,7 +26,8 @@ export default class userModel {
  findByEmail(email: User['email'], cb: Function) {
   const qry = 'select * from user where email=?'
   Connection.query(qry, [email.trim()], (err: Error | null, data: [User]) => {
-   cb(err, { success: true, data })
+   if (data.length <= 0) cb(err, { success: false, data })
+   else cb(err, { success: true, data })
   })
  }
 }

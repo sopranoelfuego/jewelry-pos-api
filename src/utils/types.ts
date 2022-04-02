@@ -151,3 +151,9 @@ export interface IGeneralResponse {
  success: boolean
  data: Object
 }
+export interface ISession {
+ sessionId: string
+ email: string
+ valid: string
+ userName: string
+}
