@@ -16,7 +16,7 @@ app.use(express.json())
 app.use(cors())
 app.use(cookieParser())
 app.use(express.static('uploads'))
-app.use(authMiddleware)
+// app.use(authMiddleware)
 // Routes
 app.use('/api/user', userRoutes)
 app.use('/api/product', productRoutes)

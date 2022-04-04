@@ -2,7 +2,8 @@ import { Response, Request, NextFunction } from 'express'
 import asyncHandler from 'express-async-handler'
 import UserModel from '../models/userModel'
 import { createSession } from '../utils/dbConnect'
-import { signJwt, verifyJwt } from '../utils/jwt'
+import { signJwt, verifyAccessTokenJwt } from '../utils/jwt'
+import { clearTokens, createTokens, setCookies } from '../utils/tokenUtils'
 import { IUserResponse, User } from '../utils/types'
 // import { User } from '../utils/types'
 
@@ -20,23 +21,12 @@ export const signIn = asyncHandler(
       message: 'invalid user or wrong password',
      })
     }
-    //  create access token
-    const accessToken = signJwt({ email }, '5m')
-    // create refreshToken
-    const session = createSession(email, data[0].userName)
-    const refreshToken = signJwt(session, '1y')
+    //  create access token & refreshToken
+    const { accessToken, refreshToken } = createTokens(data[0])
+    // set cookies
+    setCookies(res, accessToken, refreshToken)
 
-    //set cookie for that token
-    res.cookie('accessToken', accessToken, {
-     maxAge: 3000000,
-     httpOnly: true,
-    })
-    res.cookie('refreshToken', refreshToken, {
-     maxAge: 3.154e10,
-     httpOnly: true,
-    })
-
-    res.json({ success: true, data: verifyJwt(accessToken).payload })
+    res.json({ success: true, data: verifyAccessTokenJwt(accessToken) })
    }
   )
  }
@@ -53,10 +43,13 @@ export const signOut = asyncHandler(
 export const create = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let user = new UserModel()
-  user.create(req.body, (err: Error | null, doc: Object) => {
-   if (err) return next(new Error(err.message))
-   res.json(doc)
-  })
+  user.create(
+   { ...req.body, tokenVersion: 0 },
+   (err: Error | null, doc: Object) => {
+    if (err) return next(new Error(err.message))
+    res.json(doc)
+   }
+  )
  }
 )
 
@@ -64,7 +57,10 @@ export const getAll = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let user = new UserModel()
   user.getAll((err: Error | null, doc: Object) => {
-   if (err) return next(new Error(err.message))
+   if (err) {
+    console.log('error:', err.message)
+    return next(new Error(err.message))
+   }
    res.json(doc)
   })
  }
@@ -72,10 +68,21 @@ export const getAll = asyncHandler(
 export const getById = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let user = new UserModel()
-  console.log('id here', req.params.id)
   user.getById(parseInt(req.params.id), (err: Error | null, doc: Object) => {
    if (err) return next(new Error(err.message))
    res.json(doc)
+  })
+ }
+)
+
+export const logout = asyncHandler(
+ async (req: Request, res: Response, next: NextFunction) => {
+  let user = new UserModel()
+  //   @ts-ignore
+  const { email } = req.user
+  user.incrementTokenVersion(email, (err: Error | null, _: Object) => {
+   if (err) return next(new Error(err.message))
+   clearTokens(res)
   })
  }
 )

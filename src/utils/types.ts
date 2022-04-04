@@ -14,6 +14,7 @@ export interface User {
  post?: Post
  profileId: string
  profile?: Profil
+ tokenVersion: number
  passwordToken?: string
  resetPasswordToken_expire?: string
 }
@@ -27,6 +28,7 @@ export interface CreateUser {
  locationId: string
  addresse: string
  phoneNumber: string
+ tokenVersion: number
  postId: number
  profileId: number
 }
@@ -156,4 +158,12 @@ export interface ISession {
  email: string
  valid: string
  userName: string
+}
+export interface IAccessToken {
+ email: string
+}
+export interface IRefreshToken extends IAccessToken {
+ tokenVersion: number
+ exp?: number
+ iat?: number
 }

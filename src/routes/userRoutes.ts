@@ -1,8 +1,16 @@
 import { Router } from 'express'
-import { create, getAll, getById, signIn } from '../controllers/userController'
+import {
+ create,
+ getAll,
+ getById,
+ signIn,
+ logout,
+} from '../controllers/userController'
+import authMiddleware from '../middleware/authMiddleware'
 const router = Router()
 
-router.route('/').get(getAll).post(create)
+router.route('/').get(authMiddleware, getAll).post(create)
 router.route('/:id').get(getById)
-router.route('/auth').post(signIn)
+router.route('/auth').post(signIn).delete(authMiddleware, logout)
+
 export default router

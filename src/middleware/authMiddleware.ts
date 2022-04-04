@@ -1,34 +1,46 @@
 import { NextFunction, Request, Response } from 'express'
-import { getSession } from '../utils/dbConnect'
-import { verifyJwt } from '../utils/jwt'
+import userModel from '../models/userModel'
+import { verifyAccessTokenJwt, verifyRefreshTokenJwt } from '../utils/jwt'
+import { refreshTokens, setCookies } from '../utils/tokenUtils'
+import { IUserResponse } from '../utils/types'
 
 export default function authMiddleware(
  req: Request,
- _: Response,
+ res: Response,
  next: NextFunction
 ) {
  const { accessToken, refreshToken } = req.cookies
- console.log(' refresh token', refreshToken)
- if (!accessToken) return next()
- const { payload, expired } = verifyJwt(accessToken)
- // ============ IN CASE OF VALID TOKEN===========
- if (payload) {
+ const token = verifyAccessTokenJwt(accessToken)
+ // ============ IN CASE OF VALID accessToken===========
+ if (token) {
   //  @ts-ignore
-  req.user = payload
-  next()
+  req.user = token
+  return next()
  }
- // ============ IN CASE OF INVALID TOKEN AND EXPIRED ONE===========
- const { payload: refreshT } =
-  expired && refreshToken ? verifyJwt(refreshToken) : { payload: null }
+ // ============ IN CASE OF INVALID TOKEN , EXPIRED ONE OR EXPIRED REFRESHTOKEN===========
+ const refreshT = refreshToken && verifyRefreshTokenJwt(refreshToken)
 
- if (refreshT === null) {
-  console.log('no refresh token', verifyJwt(refreshToken))
-  next()
+ const user = new userModel()
+ if (!refreshT) {
+  return res.status(403).send('log in!')
  }
- // @ts-ignore
- const session = getSession(refreshT?.email, ({ err, data }) => {
-  if (err) return next()
+ //  find user by refreshToken.email
+ user.findByEmail(refreshT.email, (err: Error | null, doc: IUserResponse) => {
+  if (err) throw new Error('error acure')
+  const { data } = doc
+  const { accessToken, refreshToken } = refreshTokens(
+   refreshT,
+   data[0].tokenVersion
+  )
+  if (!refreshToken || !accessToken) {
+   return res.send('log in again !')
+  }
+  setCookies(res, accessToken, refreshToken)
+
+  //   @ts-ignore
+  req.user = verifyAccessTokenJwt(accessToken)
+  return next()
  })
- console.log('session here in authMiddlware', session)
- next()
+
+ //then must be authentificated
 }

@@ -6,7 +6,7 @@ export default class userModel {
  getAll(cb: Function): any {
   const qry = 'select * from user order by id desc'
   Connection.query(qry, (err: Error | null, data: [User]) => {
-   cb(err, { success: true, data })
+   return cb(err, { success: true, data })
   })
  }
  create(newData: CreateUser, cb: Function) {
@@ -25,6 +25,13 @@ export default class userModel {
  //  CUSTOM FUNCTION
  findByEmail(email: User['email'], cb: Function) {
   const qry = 'select * from user where email=?'
+  Connection.query(qry, [email.trim()], (err: Error | null, data: [User]) => {
+   if (data.length <= 0) cb(err, { success: false, data })
+   else cb(err, { success: true, data })
+  })
+ }
+ incrementTokenVersion(email: User['email'], cb: Function) {
+  const qry = 'update user set tokenVersion=tokenVersion+1 where email=?'
   Connection.query(qry, [email.trim()], (err: Error | null, data: [User]) => {
    if (data.length <= 0) cb(err, { success: false, data })
    else cb(err, { success: true, data })
