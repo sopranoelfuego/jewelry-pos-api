@@ -5,12 +5,16 @@ import {
  getById,
  signIn,
  logout,
+ update,
+ requestActivateAccount,
+ activateAcount,
 } from '../controllers/userController'
 import authMiddleware from '../middleware/authMiddleware'
 const router = Router()
 
 router.route('/').get(authMiddleware, getAll).post(create)
-router.route('/:id').get(getById)
+router.route('/:id').get(getById).put(update)
 router.route('/auth').post(signIn).delete(authMiddleware, logout)
+router.route('/activate').get(requestActivateAccount).post(activateAcount)
 
 export default router

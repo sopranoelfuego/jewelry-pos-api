@@ -22,7 +22,7 @@ export default function authMiddleware(
 
  const user = new userModel()
  if (!refreshT) {
-  return res.status(403).send('log in!')
+  return res.status(403).send('log in first..!')
  }
  //  find user by refreshToken.email
  user.findByEmail(refreshT.email, (err: Error | null, doc: IUserResponse) => {

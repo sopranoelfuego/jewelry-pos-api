@@ -1,20 +1,13 @@
-export interface User {
+import { Options } from 'nodemailer/lib/mailer'
+
+export interface User extends CreateUser {
  id?: number
- userName: string
- firstName: string
- lastName: string
- password: string
- email: string
- profilePicture?: string
- locationId: string
  location?: Location
- addresse: string
- phoneNumber: string
- postId: string
  post?: Post
- profileId: string
  profile?: Profil
- tokenVersion: number
+ active: string
+ code: string
+
  passwordToken?: string
  resetPasswordToken_expire?: string
 }
@@ -25,11 +18,14 @@ export interface CreateUser {
  email: string
  password: string
  profilePicture?: string
- locationId: string
+ locationId: number
  addresse: string
  phoneNumber: string
  tokenVersion: number
  postId: number
+ code?: string
+ active?: string
+ codeExpireTime?: number
  profileId: number
 }
 export interface Product {
@@ -167,3 +163,4 @@ export interface IRefreshToken extends IAccessToken {
  exp?: number
  iat?: number
 }
+export interface IMailerOptions extends Options {}

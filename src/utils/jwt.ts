@@ -1,10 +1,17 @@
-import jwt, { TokenExpiredError } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import { IAccessToken, IRefreshToken, User } from './types'
 import { PRIVATE_KEY, PUBLIC_KEY } from './keys'
+import { env } from './env'
 
-const publicKey = Buffer.from(PUBLIC_KEY, 'base64').toString('ascii')
+const publicKey = Buffer.from(
+ env.get('public_key') as string,
+ 'base64'
+).toString('ascii')
 
-const privateKey = Buffer.from(PRIVATE_KEY, 'base64').toString('ascii')
+const privateKey = Buffer.from(
+ env.get('private_key') as string,
+ 'base64'
+).toString('ascii')
 
 export function signJwt(
  payload: object,

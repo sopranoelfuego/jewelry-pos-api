@@ -1,4 +1,3 @@
-import { nanoid } from 'nanoid'
 import Connection from '../utils/dbConnect'
 import { CreateOrder, Order, User } from '../utils/types'
 

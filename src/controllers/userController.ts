@@ -1,10 +1,12 @@
 import { Response, Request, NextFunction } from 'express'
 import asyncHandler from 'express-async-handler'
 import UserModel from '../models/userModel'
-import { createSession } from '../utils/dbConnect'
-import { signJwt, verifyAccessTokenJwt } from '../utils/jwt'
+import { verifyAccessTokenJwt } from '../utils/jwt'
 import { clearTokens, createTokens, setCookies } from '../utils/tokenUtils'
 import { IUserResponse, User } from '../utils/types'
+import { getCodeExpireTime, getEmailVerificationCode } from '../utils/authUtils'
+// import { mailer } from '../utils/nodemailer'
+
 // import { User } from '../utils/types'
 
 export const signIn = asyncHandler(
@@ -21,6 +23,12 @@ export const signIn = asyncHandler(
       message: 'invalid user or wrong password',
      })
     }
+    // in case the user account is not yet activateAcount
+    if (data[0].active.trim() === '0')
+     return res.json({
+      success: true,
+      message: 'account is not yet activated..!!',
+     })
     //  create access token & refreshToken
     const { accessToken, refreshToken } = createTokens(data[0])
     // set cookies
@@ -31,23 +39,36 @@ export const signIn = asyncHandler(
   )
  }
 )
-export const signOut = asyncHandler(
+export const update = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
-  res.cookie('accessToken', '', {
-   maxAge: 0,
-   httpOnly: true,
+  let user = new UserModel()
+  user.update(req.body, (err: Error | null, doc: IUserResponse) => {
+   if (err) return next(new Error(err.message))
+   res.json(doc)
   })
-  res.json({ success: true, message: 'logout' })
  }
 )
+
 export const create = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let user = new UserModel()
+  const codeExpireTime = getCodeExpireTime()
+  const { code, hashedCode } = getEmailVerificationCode()
   user.create(
-   { ...req.body, tokenVersion: 0 },
+   { ...req.body, tokenVersion: 0, code: hashedCode, codeExpireTime },
    (err: Error | null, doc: Object) => {
     if (err) return next(new Error(err.message))
-    res.json(doc)
+    try {
+     // THEN HERE I MUST SEND THE EMAIL WITH CODE
+     //  mailer.sendMail({
+     //   from: 'no-reply@jewerly.com',
+     //   to: req.body.email,
+     //   subject: 'Account Verification',
+     //   context: { code },
+     //  } as IMailerOptions)
+     console.log('verification sent')
+     res.json({ success: true, data: code })
+    } catch (error) {}
    }
   )
  }
@@ -84,5 +105,63 @@ export const logout = asyncHandler(
    if (err) return next(new Error(err.message))
    clearTokens(res)
   })
+ }
+)
+// WHEN THE USER ASK TO ACTIVATE HIS/HER ACCOUNT
+export const requestActivateAccount = asyncHandler(
+ async (req: Request, res: Response, next: NextFunction) => {
+  let user = new UserModel()
+  user.findByEmail(
+   req.params.email,
+   (err: Error | null, doc: IUserResponse) => {
+    if (err) return next(new Error(err.message))
+    if (!doc.success)
+     return res.json({ success: false, message: 'user not found' })
+    const codeExpireTime = getCodeExpireTime()
+    const { code, hashedCode } = getEmailVerificationCode()
+    const userToUpdate: User = {
+     ...doc.data[0],
+     code: hashedCode,
+     codeExpireTime,
+    }
+    user.update(userToUpdate, (err: Error | null, doc: IUserResponse) => {
+     if (err) return next(new Error(err.message))
+     if (!doc.success)
+      return res.json({
+       success: false,
+       message: 'code not sent retry again...',
+      })
+     //      HERE WE MUST SEND THE CODE VIA NODEMAILER
+     //  ====================================================
+
+     res.json({ success: true, data: code })
+    })
+    //  user.
+   }
+  )
+ }
+)
+export const activateAcount = asyncHandler(
+ async (req: Request, res: Response, next: NextFunction) => {
+  let user = new UserModel()
+
+  user.findUserByCode(
+   req.body.code,
+   (err: Error | null, doc: IUserResponse) => {
+    if (err) return next(new Error(err.message))
+    if (!doc.success)
+     return res.json({
+      success: false,
+      data: 'code error or user may not be registreted yet',
+     })
+    user.activateAcount(req.body.code, (err: Error | null, doc: Object) => {
+     if (err) return next(new Error(err.message))
+     res.json({
+      success: true,
+      message: 'valid code and account successfull activated',
+     })
+    })
+   }
+  )
  }
 )

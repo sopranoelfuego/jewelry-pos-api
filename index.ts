@@ -8,7 +8,7 @@ import orderRoutes from './src/routes/orderRoutes'
 import orderDetails from './src/routes/orderDetailRoutes'
 import cookieParser from 'cookie-parser'
 import authMiddleware from './src/middleware/authMiddleware'
-dotenv.config()
+// dotenv.config()
 dbConnect
 const app = express()
 // middlware

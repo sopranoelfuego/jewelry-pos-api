@@ -1,4 +1,5 @@
 import { CookieOptions, Response } from 'express'
+
 import { signJwt } from './jwt'
 
 import { IAccessToken, IRefreshToken, User } from './types'
@@ -6,7 +7,7 @@ import { IAccessToken, IRefreshToken, User } from './types'
 enum TokenExpiration {
  Access = 1 * 60,
  //  Refresh = 7 * 24 * 60 * 60,
- Refresh = 2 * 60,
+ Refresh = 3 * 60,
  RefreshIfLessThan = 6 * 24 * 60 * 60,
 }
 const cookiesOptions: CookieOptions = {
@@ -45,7 +46,7 @@ export function refreshTokens(current: IRefreshToken, tokenVersion: number) {
  const accessPayload: IAccessToken = { email: current.email }
  let refreshPayload: IRefreshToken | undefined
 
- //  @ts-ignore
+ // @ts-ignore
  const expiration = new Date(current.exp * 1000)
  const now = new Date()
  const secondsUntilExpiration = (expiration.getTime() - now.getTime()) / 1000
