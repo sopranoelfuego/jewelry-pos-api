@@ -1,5 +1,10 @@
 import Connection from '../utils/dbConnect'
-import { CreateProduct, Product, User } from '../utils/types'
+import {
+ CreateProduct,
+ Product,
+ User,
+ ISQLResponseMutation,
+} from '../utils/types'
 
 export default class userModel {
  getAll(cb: Function): any {
@@ -11,9 +16,18 @@ export default class userModel {
  create(newRecord: CreateProduct, cb: Function) {
   const qry = 'insert into product set ?'
 
-  Connection.query(qry, [newRecord], (err: Error | null, data: Object) => {
-   cb(err, { success: true, data })
-  })
+  Connection.query(
+   qry,
+   [newRecord],
+   (err: Error | null, data: ISQLResponseMutation) => {
+    if (data.insertId <= 0)
+     return cb(err, {
+      success: false,
+      data: 'error product not created..',
+     })
+    else cb(err, { success: true, data })
+   }
+  )
  }
  getById(id: Product['id'], cb: Function) {
   const qry = 'select * from product where id=?'

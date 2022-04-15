@@ -1,5 +1,5 @@
 import Connection from '../utils/dbConnect'
-import { CreateOrder, Order, User } from '../utils/types'
+import { CreateOrder, Order } from '../utils/types'
 
 export default class userModel {
  getAll(cb: Function): any {
@@ -18,29 +18,6 @@ export default class userModel {
    `${new Date().getMilliseconds()}`
   const newData = { ...newRecord.order, orderNumber }
 
-  //   console.log('detailsArray', detailsArray)
-  // ;('insert into orderDetails(orderId, productId, qty, total) values ?')
-  let trans = `
-   set delimiter //;
-  start transaction;
-     insert into orders set ?
-     insert into orderDetails(orderNumber,productId,qty,unityPrice) values ?
-     select @totalSum:=sum(total) from orderDetails  where orderNumber=?
-     update orders set subtotal=@totalSum where orderNumber=?
-     COMMIT;
-     set delimiter ;
-    `
-
-  // Connection.query(
-  //  trans,
-  //  [newData, detailsArray, orderNumber, orderNumber],
-  //  (err: Error | null, data) => {
-  //   if (!data) {
-  //    err && console.log('err.message', err.message)
-  //   }
-  //   cb(err, { success: false, data })
-  //  }
-  // )
   const query1 = `insert into orders set ?`
   const query2 = `insert into orderDetails(orderNumber,productId,qty,unityPrice) values ?`
   const query3 = `select @totalSum:=sum(total) from orderDetails  where orderNumber=?`
@@ -64,13 +41,6 @@ export default class userModel {
    }
    Connection.query(query2, [detailsArray], function (err, result) {
     if (err) {
-     //  Connection.query(
-     //   'delete from orders where orderNumber=?',
-     //   [orderNumber],
-     //   function (err, result) {
-     //    console.log('deleted')
-     //   }
-     //  )
      Connection.rollback(function () {
       throw err
      })

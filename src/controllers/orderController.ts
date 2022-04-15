@@ -8,8 +8,7 @@ import { IOrderResponce } from '../utils/types'
 export const create = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let model = new OrderModel()
-  console.log('req.body', req.body)
-  model.create(req.body, (err: Error | null, doc: Object) => {
+  model.create(req.body, (err: Error | null, doc: IOrderResponce) => {
    if (err) return next(new Error(err.message))
    res.json(doc)
   })

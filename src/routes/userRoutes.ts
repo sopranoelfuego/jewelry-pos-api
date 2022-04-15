@@ -15,6 +15,9 @@ const router = Router()
 router.route('/').get(authMiddleware, getAll).post(create)
 router.route('/:id').get(getById).put(update)
 router.route('/auth').post(signIn).delete(authMiddleware, logout)
-router.route('/activate').get(requestActivateAccount).post(activateAcount)
+router
+ .route('/activate/account')
+ .get(requestActivateAccount)
+ .post(activateAcount)
 
 export default router

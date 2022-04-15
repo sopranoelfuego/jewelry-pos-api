@@ -1,6 +1,5 @@
 export * from './dbConnect'
 export * from './jwt'
-export * from './keys'
 export * from './nodemailer'
 export * from './tokenUtils'
 export * from './types'

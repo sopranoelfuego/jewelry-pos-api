@@ -1,5 +1,9 @@
 import Connection from '../utils/dbConnect'
-import { CreateOrderDetail, OrderDetail } from '../utils/types'
+import {
+ CreateOrderDetail,
+ ISQLResponseMutation,
+ OrderDetail,
+} from '../utils/types'
 
 export default class OrderDetailModel {
  getAll(cb: Function): any {
@@ -14,15 +18,20 @@ export default class OrderDetailModel {
   Connection.query(
    verifRequest,
    [newRecord.productId, newRecord.qty],
-   (err: Error | null, data: [Object]) => {
-    if (!data[0])
-     cb(err, {
+   (err: Error | null, data: ISQLResponseMutation) => {
+    if (data.insertId <= 0)
+     return cb(err, {
       success: false,
-      message: 'such quantity of products is available',
+      data: 'such quantity of products is available..',
      })
-    Connection.query(qry, [newRecord], (err: Error | null, data: [Object]) => {
-     cb(err, { success: true, data })
-    })
+
+    Connection.query(
+     qry,
+     [newRecord],
+     (err: Error | null, data: [OrderDetail]) => {
+      cb(err, { success: true, data })
+     }
+    )
    }
   )
  }

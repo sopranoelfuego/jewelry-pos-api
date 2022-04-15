@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { IAccessToken, IRefreshToken, User } from './types'
-import { PRIVATE_KEY, PUBLIC_KEY } from './keys'
+import { IAccessToken, IRefreshToken } from './types'
 import { env } from './env'
 
 const publicKey = Buffer.from(
