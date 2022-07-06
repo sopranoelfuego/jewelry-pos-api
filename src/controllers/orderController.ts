@@ -9,7 +9,7 @@ export const create = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let model = new OrderModel()
   model.create(req.body, (err: Error | null, doc: IOrderResponce) => {
-   if (err) return next(new Error(err.message))
+   if (err) return res.json({ success: false, message: err.message })
    res.json(doc)
   })
  }
@@ -61,9 +61,9 @@ export const getInvoiceBill = asyncHandler(
       postal_code: 94111,
      },
      items: itmesGot,
-     subtotal: doc.data[0].total,
-     total: doc.data[0].total,
-     order_number: doc.data[0].orderNumber,
+     subtotal: doc.data[0]?.total,
+     total: doc.data[0]?.total,
+     order_number: doc.data[0]?.orderNumber,
      header: {
       company_name: 'ISardine Nindagara',
       company_logo: './uploads/logo.png',

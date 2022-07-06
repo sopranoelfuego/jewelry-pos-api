@@ -8,6 +8,18 @@ export default class userModel {
    cb(err, { success: true, data })
   })
  }
+ avalaibleProducts(productId: number, qty: number, cb: Function): any {
+  const qry = `select * from product where id=${productId} and qty>=${qty} `
+  Connection.query(
+   qry,
+   [productId, qty],
+   (err: Error | null, data: [Object]) => {
+    console.log('data from orderModels:', data)
+    cb(err, { success: true, data })
+   }
+  )
+ }
+
  create(newRecord: CreateOrder, cb: Function) {
   const qry = 'insert into orders set ?'
   let orderNumber =
@@ -22,15 +34,19 @@ export default class userModel {
   const query2 = `insert into orderDetails(orderNumber,productId,qty,unityPrice) values ?`
   const query3 = `select @totalSum:=sum(total) from orderDetails  where orderNumber=?`
   const query4 = `update orders set subtotal=@totalSum where orderNumber=?`
-
+  let MajorError = {}
   Connection.beginTransaction(function (err) {
    if (err) {
-    throw err
+    // throw err
+    MajorError = err
+
+    // cb(err, { success: false, message: err.mess})
    }
    Connection.query(query1, [newData], function (err: Error | null, data) {
     if (err) {
      Connection.rollback(function () {
-      throw err
+      //   throw err
+      MajorError = err
      })
     }
    })
@@ -42,14 +58,17 @@ export default class userModel {
    Connection.query(query2, [detailsArray], function (err, result) {
     if (err) {
      Connection.rollback(function () {
-      throw err
+      //   throw err
+      MajorError = err
      })
     }
    })
    Connection.query(query3, [orderNumber], function (err, result) {
     if (err) {
      Connection.rollback(function () {
-      throw err
+      //   throw err
+
+      MajorError = err
      })
     }
    })
@@ -57,20 +76,20 @@ export default class userModel {
    Connection.query(query4, [orderNumber], function (err, result) {
     if (err) {
      Connection.rollback(function () {
-      throw err
+      //   throw err
+
+      MajorError = err
      })
-     return
     }
     Connection.commit(function (err) {
      if (err) {
       Connection.rollback(function () {
-       throw err
+       //    throw err
+       MajorError = err
       })
-
-      cb(err, { success: false, data: err.message })
-     }
-     console.log('success!')
-     cb(err, { success: true, data: 'created successfull..' })
+      console.log('error in rollback', err)
+      cb(MajorError, { success: false, data: err.message })
+     } else cb(err, { success: true, data: 'created successfull..' })
     })
    })
   })

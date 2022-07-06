@@ -1,6 +1,7 @@
 import { Response, Request, NextFunction } from 'express'
 import asyncHandler from 'express-async-handler'
 import UserModel from '../models/userModel'
+import bcrypt from 'bcrypt'
 import { verifyAccessTokenJwt } from '../utils/jwt'
 import { clearTokens, createTokens, setCookies } from '../utils/tokenUtils'
 import { IUserResponse, User } from '../utils/types'
@@ -17,7 +18,9 @@ export const signIn = asyncHandler(
    (err: Error | null, doc: IUserResponse) => {
     if (err) return next(new Error(err.message))
     const { success, data } = doc
-    if (!success || !(data[0]?.password === password)) {
+    const isMatch = bcrypt.compareSync(password, data[0]?.password)
+
+    if (!success || !isMatch) {
      return res.json({
       success: false,
       message: 'invalid user or wrong password',
@@ -52,10 +55,13 @@ export const update = asyncHandler(
 export const create = asyncHandler(
  async (req: Request, res: Response, next: NextFunction) => {
   let user = new UserModel()
+  let userInfo = req.body
   const codeExpireTime = getCodeExpireTime()
   const { code, hashedCode } = getEmailVerificationCode()
+  userInfo.password = await bcrypt.hash(req.body.password, 10)
+
   user.create(
-   { ...req.body, tokenVersion: 0, code: hashedCode, codeExpireTime },
+   { ...userInfo, tokenVersion: 0, code: hashedCode, codeExpireTime },
    (err: Error | null, doc: Object) => {
     if (err) return next(new Error(err.message))
     try {
@@ -116,7 +122,11 @@ export const requestActivateAccount = asyncHandler(
   user.findByEmail(
    req.query.email as string,
    (err: Error | null, doc: IUserResponse) => {
-    if (err) return next(new Error(err.message))
+    console.log('doc:', doc)
+    if (err) {
+     console.log('error:', err)
+     return next(new Error(err.message))
+    }
     if (!doc.success)
      return res.json({ success: false, message: 'user not found' })
     const codeExpireTime = getCodeExpireTime()

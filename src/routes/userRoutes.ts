@@ -13,7 +13,7 @@ import authMiddleware from '../middleware/authMiddleware'
 const router = Router()
 
 router.route('/').get(authMiddleware, getAll).post(create)
-router.route('/:id').get(getById).put(update)
+router.route('/:id').get(authMiddleware, getById).put(authMiddleware, update)
 router.route('/auth').post(signIn).delete(authMiddleware, logout)
 router
  .route('/activate/account')

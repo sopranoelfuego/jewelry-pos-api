@@ -7,6 +7,7 @@ import productRoutes from './src/routes/productRoutes'
 import orderRoutes from './src/routes/orderRoutes'
 import orderDetails from './src/routes/orderDetailRoutes'
 import cookieParser from 'cookie-parser'
+import { notFound, errorHandler } from './src/middleware/erroHandler'
 import authMiddleware from './src/middleware/authMiddleware'
 // dotenv.config()
 dbConnect
@@ -17,6 +18,7 @@ app.use(cors())
 app.use(cookieParser())
 app.use(express.static('uploads'))
 // app.use(authMiddleware)
+app.use(errorHandler)
 // Routes
 app.use('/api/user', userRoutes)
 app.use('/api/product', productRoutes)

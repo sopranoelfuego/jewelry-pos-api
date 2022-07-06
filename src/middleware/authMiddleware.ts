@@ -26,7 +26,7 @@ export default function authMiddleware(
  }
  //  find user by refreshToken.email
  user.findByEmail(refreshT.email, (err: Error | null, doc: IUserResponse) => {
-  if (err) throw new Error('error acure')
+  if (err) throw new Error(`error acure: ${err}`)
   const { data } = doc
   const { accessToken, refreshToken } = refreshTokens(
    refreshT,

@@ -11,6 +11,7 @@
  "author": "",
  "license": "ISC",
  "dependencies": {
+  "bcrypt": "^5.0.1",
   "cookie-parser": "^1.4.6",
   "cors": "^2.8.5",
   "dotenv": "^16.0.0",
@@ -24,6 +25,7 @@
   "nodemailer": "^6.7.3"
  },
  "devDependencies": {
+  "@types/bcrypt": "^5.0.0",
   "@types/cookie-parser": "^1.4.2",
   "@types/cors": "^2.8.12",
   "@types/dotenv": "^8.2.0",

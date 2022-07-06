@@ -32,12 +32,12 @@ export const setCookies = (
 ) => {
  res.cookie('accessToken', accessToken, {
   ...cookiesOptions,
-  maxAge: TokenExpiration.Access * 1000,
+  maxAge: TokenExpiration.Access * 900000,
  })
  refreshToken &&
   res.cookie('refreshToken', refreshToken, {
    ...cookiesOptions,
-   maxAge: TokenExpiration.Refresh * 1000,
+   maxAge: TokenExpiration.Refresh * 1000000,
   })
 }
 
